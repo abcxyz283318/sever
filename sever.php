@@ -9,10 +9,10 @@ if ($device == "" || $days <= 0) {
     exit;
 }
 
-$expire = time() + ($days * 86400);  // thời gian hết hạn
+$expire = time() + ($days * 86400);  // ngày hết hạn
 $file = "device_keys.txt";
 
-// Lưu key dạng KEY|TIMESTAMP
+// Lưu KEY|TIMESTAMP
 $line = $device . "|" . $expire . PHP_EOL;
 file_put_contents($file, $line, FILE_APPEND);
 
