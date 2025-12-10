@@ -1,35 +1,23 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
-// File chứa danh sách key
+$device = $_POST["device"] ?? "";
+$days = intval($_POST["days"] ?? 0);
+
+if ($device == "" || $days <= 0) {
+    echo json_encode(["status" => "error", "msg" => "Missing data"]);
+    exit;
+}
+
+$expire = time() + ($days * 86400);  // thời gian hết hạn
 $file = "device_keys.txt";
 
-if (!file_exists($file)) {
-    echo json_encode(["status" => "denied", "msg" => "NO_DATABASE"]);
-    exit;
-}
+// Lưu key dạng KEY|TIMESTAMP
+$line = $device . "|" . $expire . PHP_EOL;
+file_put_contents($file, $line, FILE_APPEND);
 
-$device = $_GET["device"] ?? "";
-if ($device == "") {
-    echo json_encode(["status" => "denied", "msg" => "NO_DEVICE"]);
-    exit;
-}
-
-$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-foreach ($lines as $line) {
-    list($key, $expire) = explode("|", trim($line));
-
-    if ($key == $device) {
-        if (time() > intval($expire)) {
-            echo json_encode(["status" => "expired", "msg" => "KEY_EXPIRED"]);
-            exit;
-        }
-
-        echo json_encode(["status" => "allowed", "msg" => "OK"]);
-        exit;
-    }
-}
-
-echo json_encode(["status" => "denied", "msg" => "DEVICE_NOT_FOUND"]);
-
+echo json_encode([
+    "status" => "success",
+    "device" => $device,
+    "expire" => $expire
+]);
